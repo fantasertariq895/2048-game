@@ -1,38 +1,111 @@
-# 2048
-A small clone of [1024](https://play.google.com/store/apps/details?id=com.veewo.a1024), based on [Saming's 2048](http://saming.fr/p/2048/) (also a clone). 2048 was indirectly inspired by [Threes](https://asherv.com/threes/).
+# 🚀 2048 Game — CI/CD Pipeline on AWS
 
-Made just for fun. [Play it here!](http://gabrielecirulli.github.io/2048/)
+This repository contains a containerized version of the **2048 game**, along with a complete **CI/CD pipeline** built on AWS using GitHub, CodePipeline, CodeBuild, Amazon ECR, and Amazon ECS (Fargate).  
+Whenever you push changes to GitHub, the pipeline automatically builds, stores, and deploys the updated container to AWS — giving you a live, always-up-to-date web game.
 
-The official app can also be found on the [Play Store](https://play.google.com/store/apps/details?id=com.gabrielecirulli.app2048) and [App Store!](https://itunes.apple.com/us/app/2048-by-gabriele-cirulli/id868076805)
+---
 
-### Contributions
+## 📸 Project Screenshots
 
-[Anna Harren](https://github.com/iirelu/) and [sigod](https://github.com/sigod) are maintainers for this repository.
+### 🎮 Live Game
+![Game Screenshot](./meta/game-screenshot.png)
 
-Other notable contributors:
+### 🏗️ CI/CD Pipeline Run
+![Pipeline Success](./meta//CI-CD%20Pipeline.png)
 
- - [TimPetricola](https://github.com/TimPetricola) added best score storage
- - [chrisprice](https://github.com/chrisprice) added custom code for swipe handling on mobile
- - [marcingajda](https://github.com/marcingajda) made swipes work on Windows Phone
- - [mgarciaisaia](https://github.com/mgarciaisaia) added support for Android 2.3
+### 🐳 Amazon ECR Repository
+![Amazon ECR Repository](./meta/repo-in-ecr.png)
 
-Many thanks to [rayhaanj](https://github.com/rayhaanj), [Mechazawa](https://github.com/Mechazawa), [grant](https://github.com/grant), [remram44](https://github.com/remram44) and [ghoullier](https://github.com/ghoullier) for the many other good contributions.
+### 📊 Architecture
+![Architecture Diagram](./meta/CI-CD%20Pipeline.png)
 
-### Screenshot
+### ECS Cluster & Service
+![Amazon ECS Cluster](./meta/ecs-cluster-service.png)
 
-<p align="center">
-  <img src="https://cloud.githubusercontent.com/assets/1175750/8614312/280e5dc2-26f1-11e5-9f1f-5891c3ca8b26.png" alt="Screenshot"/>
-</p>
+### Cloudwatch Logs
+![Amazon CloudWatch Logs](./meta/cloudwatch-log-streams.png)
 
-That screenshot is fake, by the way. I never reached 2048 :smile:
 
-## Contributing
-Changes and improvements are more than welcome! Feel free to fork and open a pull request. Please make your changes in a specific branch and request to pull into `master`! If you can, please make sure the game fully works before sending the PR, as that will help speed up the process.
+## 📁 Repository Structure
 
-You can find the same information in the [contributing guide.](https://github.com/gabrielecirulli/2048/blob/master/CONTRIBUTING.md)
+.
+├── js/ # Game’s JavaScript source files
+├── style/ # CSS / SCSS / styling files
+├── index.html # Entry point (HTML)
+├── Dockerfile # Instructions for building the Docker image
+├── buildspec.yml # AWS CodeBuild build instructions
+├── meta/CI-CD Pipeline.png # Architecture diagram
+└── README.md # Project documentation (this file)
 
-## License
-2048 is licensed under the [MIT license.](https://github.com/gabrielecirulli/2048/blob/master/LICENSE.txt)
 
-## Donations
-I made this in my spare time, and it's hosted on GitHub (which means I don't have any hosting costs), but if you enjoyed the game and feel like buying me coffee, you can donate at my BTC address: `1Ec6onfsQmoP9kkL3zkpB6c5sA4PVcXU2i`. Thank you very much!
+
+---
+
+## 🏗️ Architecture & Workflow
+
+Here’s how everything fits together:
+
+### 🖼 Architecture Diagram  
+(Viewable in this repo at `meta/CI-CD Pipeline.png`)
+
+### 🔄 CI/CD Flow (Step-by-Step)
+
+1. **GitHub (Source Stage):**  
+   Developer pushes code changes (HTML, JS, CSS, Dockerfile) to the GitHub repository.  
+   AWS CodePipeline is configured to monitor the `main` branch for commits.
+
+2. **CodePipeline (Orchestration):**  
+   When a change is detected, the pipeline triggers the **Build** stage.
+
+3. **CodeBuild (Build & Push):**  
+   - Runs the commands defined in `buildspec.yml`  
+   - **Pre-build:** logs in to Amazon ECR  
+   - **Build:** builds a Docker image of the 2048 game  
+   - **Post-build:** tags and pushes the image to ECR, and generates `imagedefinitions.json`
+
+4. **Amazon ECR (Container Registry):**  
+   Stores and versions the Docker images. ECS uses these images for deployment.
+
+5. **Amazon ECS (Fargate Service):**  
+   - ECS pulls the latest image from ECR.  
+   - Replaces the old container task with a new one containing the updated code.  
+   - Your game is thus redeployed automatically with each commit.
+
+6. **User Access / Networking:**  
+   - The ECS task is configured to expose port 80 and allow public access.  
+   - Users open the public IP / DNS and play the live 2048 game in a browser.
+
+---
+
+## 🛠 Technologies & Services Used
+
+| Component              | Role / Purpose |
+|------------------------|----------------|
+| **GitHub**             | Host source code and trigger pipeline |
+| **Docker**             | Package 2048 game as a container |
+| **AWS CodePipeline**   | Automate the flow from source → build → deploy |
+| **AWS CodeBuild**      | Build and push Docker image via `buildspec.yml` |
+| **Amazon ECR**         | Private container registry for storing images |
+| **Amazon ECS (Fargate)** | Run container as serverless tasks, manage rolling updates |
+| **IAM / Permissions**  | Secure access between services (ECR, CodeBuild, ECS) |
+| **Networking / VPC**   | Public IP / endpoint configuration |
+
+---
+
+## 🧷 How to Run Locally (for Demo / Testing)
+
+```bash
+# Clone this repo
+git clone https://github.com/fantasertariq895/2048-game.git
+cd 2048-game
+
+# Build Docker image locally
+docker build -t 2048-game .
+
+# Run container locally, mapping port 80 to 8080
+docker run -p 8080:80 2048-game
+
+
+---
+
+👉 Would you also like me to **generate a GitHub profile-style README section** (with badges, skill highlights, etc.) so when HR sees your repo they instantly know it’s a professional cloud project?
