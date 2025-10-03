@@ -52,7 +52,7 @@ Here’s how everything fits together:
 
 1. **GitHub (Source Stage):**  
    Developer pushes code changes (HTML, JS, CSS, Dockerfile) to the GitHub repository.  
-   AWS CodePipeline is configured to monitor the `main` branch for commits.
+   AWS CodePipeline is configured to monitor the `main` branch for commitss.
 
 2. **CodePipeline (Orchestration):**  
    When a change is detected, the pipeline triggers the **Build** stage.
